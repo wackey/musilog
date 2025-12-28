@@ -97,13 +97,15 @@ get_header();
             }
 
             // Navigation
-            echo '<div class="navigation-spacer" style="height: 100px; width: 100%; clear: both;"></div>';
+            echo '<div class="post-nav-wrapper" style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #eeeeee;">';
+            // Removed spacer
             the_post_navigation(
                 array(
                     'prev_text' => '<span class="nav-subtitle">' . esc_html__( 'Previous:', 'musilog' ) . '</span> <span class="nav-title">%title</span>',
                     'next_text' => '<span class="nav-subtitle">' . esc_html__( 'Next:', 'musilog' ) . '</span> <span class="nav-title">%title</span>',
                 )
             );
+            echo '</div>';
 
 			// If comments are open or we have at least one comment, load up the comment template.
 			if ( comments_open() || get_comments_number() ) :

@@ -54,9 +54,9 @@ function musilog_scripts() {
     wp_enqueue_style( 'musilog-fonts', 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Outfit:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap', array(), null );
 
 	// Main Stylesheet
-	wp_enqueue_style( 'musilog-style', get_stylesheet_uri(), array(), '1.0.0' );
+	wp_enqueue_style( 'musilog-style', get_stylesheet_uri(), array(), filemtime( get_stylesheet_directory() . '/style.css' ) );
 
     // Main Scripts
-    wp_enqueue_script( 'musilog-script', get_template_directory_uri() . '/assets/js/main.js', array(), '1.0.0', true );
+    wp_enqueue_script( 'musilog-script', get_template_directory_uri() . '/assets/js/main.js', array(), filemtime( get_template_directory() . '/assets/js/main.js' ), true );
 }
 add_action( 'wp_enqueue_scripts', 'musilog_scripts' );

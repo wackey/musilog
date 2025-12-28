@@ -40,9 +40,9 @@ get_header();
             </div><!-- .post-grid -->
             <?php
 
-			the_posts_navigation( array(
-                'prev_text' => __( 'Previous', 'musilog' ),
-                'next_text' => __( 'Next', 'musilog' ),
+			the_posts_pagination( array(
+                'prev_text' => '<span aria-hidden="true">&larr;</span>',
+                'next_text' => '<span aria-hidden="true">&rarr;</span>',
             ) );
 
 		else :
