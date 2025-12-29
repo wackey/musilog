@@ -60,3 +60,45 @@ function musilog_scripts() {
     wp_enqueue_script( 'musilog-script', get_template_directory_uri() . '/assets/js/main.js', array(), filemtime( get_template_directory() . '/assets/js/main.js' ), true );
 }
 add_action( 'wp_enqueue_scripts', 'musilog_scripts' );
+
+/**
+ * Add Meta Description
+ */
+function musilog_add_meta_tags() {
+    if ( is_single() || is_page() ) {
+        global $post;
+        $description = '';
+
+        if ( has_excerpt() ) {
+            $description = get_the_excerpt();
+        } else {
+            $content = $post->post_content;
+            $content = strip_shortcodes( $content );
+            $content = strip_tags( $content );
+            $content = str_replace( array("\r\n", "\r", "\n"), '', $content );
+            $description = mb_substr( $content, 0, 120, 'UTF-8' );
+            if ( mb_strlen( $content, 'UTF-8' ) > 120 ) {
+                $description .= '...';
+            }
+        }
+    } elseif ( is_home() || is_front_page() ) {
+        $description = get_bloginfo( 'description' );
+    } elseif ( is_category() ) {
+        $description = category_description();
+    } elseif ( is_tag() ) {
+        $description = tag_description();
+    }
+
+    // Fallback if empty
+    if ( empty( $description ) && ( is_home() || is_front_page() ) ) {
+         $description = get_bloginfo( 'name' ) . ' is a personal blog.';
+    }
+
+    // Clean up
+    $description = trim( strip_tags( $description ) );
+
+    if ( ! empty( $description ) ) {
+        echo '<meta name="description" content="' . esc_attr( $description ) . '" />' . "\n";
+    }
+}
+add_action( 'wp_head', 'musilog_add_meta_tags', 1 );
