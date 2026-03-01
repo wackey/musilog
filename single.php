@@ -50,6 +50,33 @@ get_header();
                     ?>
                 </div><!-- .entry-content -->
 
+                <div class="author-box">
+                    <div class="author-avatar">
+                        <?php echo get_avatar( get_the_author_meta( 'ID' ), 100 ); ?>
+                    </div>
+                    <div class="author-info">
+                        <div class="author-name-title"><?php esc_html_e( 'この記事を書いた人', 'musilog' ); ?></div>
+                        <h3 class="author-name"><?php echo esc_html( get_the_author() ); ?></h3>
+                        <div class="author-bio">
+                            <?php echo wp_kses_post( wpautop( get_the_author_meta( 'description' ) ) ); ?>
+                        </div>
+                        <div class="author-social-links">
+                            <?php if ( get_the_author_meta( 'twitter' ) ) : ?>
+                                <a href="<?php echo esc_url( get_the_author_meta( 'twitter' ) ); ?>" target="_blank" rel="noopener noreferrer" class="social-twitter">X (Twitter)</a>
+                            <?php endif; ?>
+                            <?php if ( get_the_author_meta( 'threads' ) ) : ?>
+                                <a href="<?php echo esc_url( get_the_author_meta( 'threads' ) ); ?>" target="_blank" rel="noopener noreferrer" class="social-threads">Threads</a>
+                            <?php endif; ?>
+                            <?php if ( get_the_author_meta( 'note' ) ) : ?>
+                                <a href="<?php echo esc_url( get_the_author_meta( 'note' ) ); ?>" target="_blank" rel="noopener noreferrer" class="social-note">note</a>
+                            <?php endif; ?>
+                            <?php if ( get_the_author_meta( 'youtube' ) ) : ?>
+                                <a href="<?php echo esc_url( get_the_author_meta( 'youtube' ) ); ?>" target="_blank" rel="noopener noreferrer" class="social-youtube">YouTube</a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Ad Placeholder: After Content -->
                 <div class="ad-placeholder ad-after-content">
                     <p>Advertisement Space (Concept)</p>

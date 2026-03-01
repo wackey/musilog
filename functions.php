@@ -102,3 +102,15 @@ function musilog_add_meta_tags() {
     }
 }
 add_action( 'wp_head', 'musilog_add_meta_tags', 1 );
+
+/**
+ * Add custom user contact methods
+ */
+function musilog_user_contact_methods( $user_contact ) {
+    $user_contact['twitter'] = 'X (Twitter)';
+    $user_contact['threads'] = 'Threads';
+    $user_contact['note']    = 'note';
+    $user_contact['youtube'] = 'YouTube';
+    return $user_contact;
+}
+add_filter( 'user_contactmethods', 'musilog_user_contact_methods' );
