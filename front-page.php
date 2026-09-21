@@ -7,7 +7,7 @@ get_header();
         <div class="hero-copy">
             <p class="eyebrow"><span></span> TAKASHI WAKIMURA / MUSILOG</p>
             <h1><?php echo nl2br( esc_html( get_theme_mod( 'musilog_hero_title', "つくる。伝える。\n日々を、少しよくする。" ) ) ); ?></h1>
-            <p class="hero-description"><?php echo esc_html( get_theme_mod( 'musilog_hero_description', 'Webディレクター・ブロガーの脇村 隆です。Web制作と運用の経験をもとに、目的の整理からWordPressの構築・改善まで。事業の「こんなことをしたい」を、一緒にかたちにします。' ) ); ?></p>
+            <p class="hero-description"><?php echo esc_html( get_theme_mod( 'musilog_hero_description', 'Webディレクター・Web制作×AI活用支援の脇村 隆です。Web制作と運用の経験をもとに、目的の整理からWordPressの構築・改善まで。事業の「こんなことをしたい」を、一緒にかたちにします。' ) ); ?></p>
             <div class="hero-actions"><a class="button button-dark" href="<?php echo esc_url( musilog_contact_url() ); ?>">Web制作を相談する <span aria-hidden="true">↗︎</span></a><a class="text-link" href="<?php echo esc_url( musilog_blog_url() ); ?>">ブログを読む <span aria-hidden="true">→</span></a></div>
             <p class="hero-note">WEB DIRECTION / WORDPRESS / BLOGGING</p>
         </div>

@@ -8,9 +8,9 @@
         else { ?><img src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/musilog_logo.png' ); ?>" alt="" loading="lazy"><?php }
         ?></div>
         <h2><?php echo esc_html( get_theme_mod( 'musilog_profile_name', '脇村 隆' ) ); ?></h2>
-        <p class="profile-role"><?php echo esc_html( get_theme_mod( 'musilog_profile_role', 'Webディレクター / ブロガー' ) ); ?></p>
+        <p class="profile-role"><?php echo esc_html( get_theme_mod( 'musilog_profile_role', 'Web制作×AI活用支援 / Webディレクター' ) ); ?></p>
         <p class="profile-since">WRITING SINCE 2006</p>
-        <div class="profile-bio"><?php echo wpautop( esc_html( get_theme_mod( 'musilog_profile_bio', '脇村 隆（wackey）。Webディレクション・制作を経て、企業の発信やメディア運営に携わってきました。2006年から、Web・AI・仕事の工夫と暮らしの実体験をムジログに綴っています。' ) ) ); ?></div>
+        <div class="profile-bio"><?php echo wpautop( esc_html( get_theme_mod( 'musilog_profile_bio', "Web制作に携わって24年。商工会や自治体など公的機関のWebサイト制作・運用を14年にわたり支援してきました。目的の整理から、WordPressでの構築、公開後の運用、AIを使った業務の効率化まで、一人の担当者として一貫してお手伝いします。\n横浜・あざみ野を拠点に活動しています。" ) ) ); ?></div>
         <a class="profile-link" href="<?php echo esc_url( musilog_profile_url() ); ?>">ムジログと脇村 隆について <span aria-hidden="true">→</span></a>
     </section>
     <?php if ( is_active_sidebar( 'sidebar-blog' ) ) : dynamic_sidebar( 'sidebar-blog' ); else : ?>

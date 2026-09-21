@@ -62,13 +62,27 @@ function musilog_scripts() {
 add_action( 'wp_enqueue_scripts', 'musilog_scripts' );
 
 /**
- * Add Meta Description
+ * Add Meta Description & OGP Tags
  */
 function musilog_add_meta_tags() {
     $description = '';
+    $title       = '';
+    $type        = 'website';
+    $url         = home_url( '/' );
+    $image       = get_template_directory_uri() . '/assets/images/ogp.png';
+
     if ( is_single() || is_page() ) {
         global $post;
-        $description = '';
+        $title = get_the_title();
+        $type  = 'article';
+        $url   = get_permalink();
+
+        if ( has_post_thumbnail( $post ) ) {
+            $thumbnail_url = get_the_post_thumbnail_url( $post, 'large' );
+            if ( ! empty( $thumbnail_url ) ) {
+                $image = $thumbnail_url;
+            }
+        }
 
         if ( has_excerpt() ) {
             $description = get_the_excerpt();
@@ -76,31 +90,59 @@ function musilog_add_meta_tags() {
             $content = $post->post_content;
             $content = strip_shortcodes( $content );
             $content = strip_tags( $content );
-            $content = str_replace( array("\r\n", "\r", "\n"), '', $content );
+            $content = str_replace( array( "\r\n", "\r", "\n" ), '', $content );
             $description = mb_substr( $content, 0, 120, 'UTF-8' );
             if ( mb_strlen( $content, 'UTF-8' ) > 120 ) {
                 $description .= '...';
             }
         }
     } elseif ( is_home() || is_front_page() ) {
+        $title       = get_bloginfo( 'name' );
         $description = get_bloginfo( 'description' );
+        $url         = home_url( '/' );
     } elseif ( is_category() ) {
+        $title       = single_cat_title( '', false );
         $description = category_description();
+        $url         = get_category_link( get_queried_object_id() );
     } elseif ( is_tag() ) {
+        $title       = single_tag_title( '', false );
         $description = tag_description();
+        $url         = get_tag_link( get_queried_object_id() );
+    } elseif ( is_archive() ) {
+        $title       = get_the_archive_title();
+        $url         = get_pagenum_link();
     }
 
     // Fallback if empty
     if ( empty( $description ) && ( is_home() || is_front_page() ) ) {
-         $description = get_bloginfo( 'name' ) . ' is a personal blog.';
+        $description = get_bloginfo( 'name' ) . ' is a personal blog.';
     }
 
     // Clean up
     $description = trim( strip_tags( $description ) );
+    $site_name   = get_bloginfo( 'name' );
 
+    // Meta Description
     if ( ! empty( $description ) ) {
         echo '<meta name="description" content="' . esc_attr( $description ) . '" />' . "\n";
     }
+
+    // OGP Tags
+    echo '<meta property="og:site_name" content="' . esc_attr( $site_name ) . '" />' . "\n";
+    echo '<meta property="og:locale" content="' . esc_attr( get_locale() ) . '" />' . "\n";
+    echo '<meta property="og:type" content="' . esc_attr( $type ) . '" />' . "\n";
+    if ( ! empty( $title ) ) {
+        echo '<meta property="og:title" content="' . esc_attr( $title ) . '" />' . "\n";
+        echo '<meta name="twitter:title" content="' . esc_attr( $title ) . '" />' . "\n";
+    }
+    if ( ! empty( $description ) ) {
+        echo '<meta property="og:description" content="' . esc_attr( $description ) . '" />' . "\n";
+        echo '<meta name="twitter:description" content="' . esc_attr( $description ) . '" />' . "\n";
+    }
+    echo '<meta property="og:url" content="' . esc_url( $url ) . '" />' . "\n";
+    echo '<meta property="og:image" content="' . esc_url( $image ) . '" />' . "\n";
+    echo '<meta name="twitter:image" content="' . esc_url( $image ) . '" />' . "\n";
+    echo '<meta name="twitter:card" content="summary_large_image" />' . "\n";
 }
 add_action( 'wp_head', 'musilog_add_meta_tags', 1 );
 
@@ -121,12 +163,12 @@ function musilog_customize_register( $wp_customize ) {
     $wp_customize->add_section( 'musilog_identity', array( 'title' => 'Musilog：プロフィール・お仕事', 'priority' => 30 ) );
     $fields = array(
         'profile_name' => array( '表示名', '脇村 隆', 'text', 'sanitize_text_field' ),
-        'profile_role' => array( '肩書き', 'Webディレクター / ブロガー', 'text', 'sanitize_text_field' ),
-        'profile_bio' => array( '自己紹介', '脇村 隆（wackey）。Webディレクション・制作を経て、企業の発信やメディア運営に携わってきました。2006年から、Web・AI・仕事の工夫と暮らしの実体験をムジログに綴っています。', 'textarea', 'sanitize_textarea_field' ),
+        'profile_role' => array( '肩書き', 'Web制作×AI活用支援 / Webディレクター', 'text', 'sanitize_text_field' ),
+        'profile_bio' => array( '自己紹介', "Web制作に携わって24年。商工会や自治体など公的機関のWebサイト制作・運用を14年にわたり支援してきました。目的の整理から、WordPressでの構築、公開後の運用、AIを使った業務の効率化まで、一人の担当者として一貫してお手伝いします。\n横浜・あざみ野を拠点に活動しています。", 'textarea', 'sanitize_textarea_field' ),
         'profile_url' => array( '詳しいプロフィールのURL', '', 'url', 'esc_url_raw' ),
         'contact_url' => array( 'お問い合わせページのURL', '', 'url', 'esc_url_raw' ),
         'hero_title' => array( 'トップページの見出し', "つくる。伝える。\n日々を、少しよくする。", 'textarea', 'sanitize_textarea_field' ),
-        'hero_description' => array( 'トップページの紹介文', 'Webディレクター・ブロガーの脇村 隆です。Web制作と運用の経験をもとに、目的の整理からWordPressの構築・改善まで。事業の「こんなことをしたい」を、一緒にかたちにします。', 'textarea', 'sanitize_textarea_field' ),
+        'hero_description' => array( 'トップページの紹介文', 'Webディレクター・Web制作×AI活用支援の脇村 隆です。Web制作と運用の経験をもとに、目的の整理からWordPressの構築・改善まで。事業の「こんなことをしたい」を、一緒にかたちにします。', 'textarea', 'sanitize_textarea_field' ),
     );
     foreach ( $fields as $key => $field ) {
         $wp_customize->add_setting( 'musilog_' . $key, array( 'default' => $field[1], 'sanitize_callback' => $field[3] ) );
@@ -183,7 +225,7 @@ function musilog_topics() {
 function musilog_reading_picks() {
     $picks = array(
         array( 'label' => 'これからの働き方', 'title' => '個人の名前で、仕事をしていく。', 'description' => '会社経営を経て、フリーランスとしての活動も始めることにした理由。', 'path' => '/shigoto-memo/business-management/17826/', 'date' => '2026.08.31' ),
-        array( 'label' => 'Web制作の実践', 'title' => '自分のブログも、つくって試す。', 'description' => 'Antigravityを使って、このブログのWordPressテーマをリニューアルした記録。', 'path' => '/web-memo/blog/17145/', 'date' => '2025.12.28' ),
+        array( 'label' => 'Web制作の実践', 'title' => 'Web化の下準備もAIで自動化＆高速化する。', 'description' => '飲食店マップのチラシから、住所の調査、公式Webの調査、Excel一覧化からGoogle Mapへ。', 'path' => '/web-memo/website-management/17906/', 'date' => '2025.12.28' ),
         array( 'label' => '日々の小さな効率化', 'title' => '繰り返す作業を、ひとつ減らす。', 'description' => 'Macのショートカットで、複数の画像サイズをまとめて揃える工夫。', 'path' => '/shigoto-memo/macpc/14924/', 'date' => '2022.12.02' ),
     );
     foreach ( $picks as $index => &$pick ) {
