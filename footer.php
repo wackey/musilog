@@ -24,6 +24,7 @@
                         'theme_location' => 'menu-footer',
                         'menu_id'        => 'footer-menu',
                         'depth'          => 1,
+                        'fallback_cb' => 'musilog_footer_menu',
                     )
                 );
                 ?>

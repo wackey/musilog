@@ -65,6 +65,7 @@ add_action( 'wp_enqueue_scripts', 'musilog_scripts' );
  * Add Meta Description
  */
 function musilog_add_meta_tags() {
+    $description = '';
     if ( is_single() || is_page() ) {
         global $post;
         $description = '';
@@ -114,3 +115,119 @@ function musilog_user_contact_methods( $user_contact ) {
     return $user_contact;
 }
 add_filter( 'user_contactmethods', 'musilog_user_contact_methods' );
+
+/** Editable personal site settings. */
+function musilog_customize_register( $wp_customize ) {
+    $wp_customize->add_section( 'musilog_identity', array( 'title' => 'Musilog：プロフィール・お仕事', 'priority' => 30 ) );
+    $fields = array(
+        'profile_name' => array( '表示名', '脇村 隆', 'text', 'sanitize_text_field' ),
+        'profile_role' => array( '肩書き', 'Webディレクター / ブロガー', 'text', 'sanitize_text_field' ),
+        'profile_bio' => array( '自己紹介', '脇村 隆（wackey）。Webディレクション・制作を経て、企業の発信やメディア運営に携わってきました。2006年から、Web・AI・仕事の工夫と暮らしの実体験をムジログに綴っています。', 'textarea', 'sanitize_textarea_field' ),
+        'profile_url' => array( '詳しいプロフィールのURL', '', 'url', 'esc_url_raw' ),
+        'contact_url' => array( 'お問い合わせページのURL', '', 'url', 'esc_url_raw' ),
+        'hero_title' => array( 'トップページの見出し', "つくる。伝える。\n日々を、少しよくする。", 'textarea', 'sanitize_textarea_field' ),
+        'hero_description' => array( 'トップページの紹介文', 'Webディレクター・ブロガーの脇村 隆です。Web制作と運用の経験をもとに、目的の整理からWordPressの構築・改善まで。事業の「こんなことをしたい」を、一緒にかたちにします。', 'textarea', 'sanitize_textarea_field' ),
+    );
+    foreach ( $fields as $key => $field ) {
+        $wp_customize->add_setting( 'musilog_' . $key, array( 'default' => $field[1], 'sanitize_callback' => $field[3] ) );
+        $wp_customize->add_control( 'musilog_' . $key, array( 'label' => $field[0], 'section' => 'musilog_identity', 'type' => $field[2] ) );
+    }
+    $wp_customize->add_setting( 'musilog_profile_image', array( 'sanitize_callback' => 'absint' ) );
+    $wp_customize->add_control( new WP_Customize_Media_Control( $wp_customize, 'musilog_profile_image', array( 'label' => 'プロフィール画像', 'section' => 'musilog_identity', 'mime_type' => 'image' ) ) );
+}
+add_action( 'customize_register', 'musilog_customize_register' );
+function musilog_widgets_init() {
+    register_sidebar( array( 'name' => 'ブログサイドバー（プロフィールの下）', 'id' => 'sidebar-blog', 'before_widget' => '<section id="%1$s" class="sidebar-widget %2$s">', 'after_widget' => '</section>', 'before_title' => '<h2 class="sidebar-title">', 'after_title' => '</h2>' ) );
+}
+add_action( 'widgets_init', 'musilog_widgets_init' );
+function musilog_blog_url() {
+    $page = (int) get_option( 'page_for_posts' );
+    return $page ? get_permalink( $page ) : add_query_arg( 'musilog_blog', '1', home_url( '/' ) );
+}
+/** Prefer existing local content; use verified public pages in an empty preview site. */
+function musilog_public_page_url( $path ) {
+    $post_id = url_to_postid( home_url( '/' . ltrim( $path, '/' ) ) );
+    $page = $post_id ? get_post( $post_id ) : get_page_by_path( trim( $path, '/' ), OBJECT, array( 'page', 'post' ) );
+    if ( $page && 'publish' === $page->post_status ) {
+        return get_permalink( $page );
+    }
+    return 'https://musilog.net/' . ltrim( $path, '/' );
+}
+function musilog_contact_url() {
+    $url = get_theme_mod( 'musilog_contact_url', '' );
+    if ( $url ) { return $url; }
+    foreach ( array( 'inquiry', 'contact' ) as $slug ) {
+        $page = get_page_by_path( $slug );
+        if ( $page && 'publish' === $page->post_status ) { return get_permalink( $page ); }
+    }
+    return 'https://musilog.net/inquiry/';
+}
+function musilog_profile_url() {
+    return get_theme_mod( 'musilog_profile_url', '' ) ?: musilog_public_page_url( '/about/' );
+}
+function musilog_topics() {
+    $topics = array(
+        array( 'slug' => 'web-memo', 'path' => 'web-memo', 'name' => 'Webメモ', 'label' => 'WEB & CREATION', 'description' => 'Web制作・WordPress・ブログ運営' ),
+        array( 'slug' => 'shigoto-memo', 'path' => 'shigoto-memo', 'name' => 'しごとメモ', 'label' => 'WORK & IDEAS', 'description' => 'AI・ガジェット・効率化・働き方' ),
+        array( 'slug' => 'kurashi-memo', 'path' => 'kurashi-memo', 'name' => 'くらしメモ', 'label' => 'LIFE & MUSIC', 'description' => '暮らしの発見・音楽・日々の記録' ),
+        array( 'slug' => 'spot', 'path' => 'kurashi-memo/spot', 'name' => 'スポット情報', 'label' => 'PLACES & EXPERIENCES', 'description' => '出かけて、体験して、残すメモ' ),
+    );
+    foreach ( $topics as &$topic ) {
+        $term = get_category_by_slug( $topic['slug'] );
+        $url = $term ? get_category_link( $term ) : false;
+        $topic['url'] = $url && ! is_wp_error( $url ) ? $url : 'https://musilog.net/category/' . $topic['path'] . '/';
+    }
+    unset( $topic );
+    return $topics;
+}
+function musilog_reading_picks() {
+    $picks = array(
+        array( 'label' => 'これからの働き方', 'title' => '個人の名前で、仕事をしていく。', 'description' => '会社経営を経て、フリーランスとしての活動も始めることにした理由。', 'path' => '/shigoto-memo/business-management/17826/', 'date' => '2026.08.31' ),
+        array( 'label' => 'Web制作の実践', 'title' => '自分のブログも、つくって試す。', 'description' => 'Antigravityを使って、このブログのWordPressテーマをリニューアルした記録。', 'path' => '/web-memo/blog/17145/', 'date' => '2025.12.28' ),
+        array( 'label' => '日々の小さな効率化', 'title' => '繰り返す作業を、ひとつ減らす。', 'description' => 'Macのショートカットで、複数の画像サイズをまとめて揃える工夫。', 'path' => '/shigoto-memo/macpc/14924/', 'date' => '2022.12.02' ),
+    );
+    foreach ( $picks as $index => &$pick ) {
+        $n = $index + 1;
+        $pick['title'] = get_theme_mod( 'musilog_pick_' . $n . '_title', $pick['title'] );
+        $pick['description'] = get_theme_mod( 'musilog_pick_' . $n . '_description', $pick['description'] );
+        $pick['url'] = get_theme_mod( 'musilog_pick_' . $n . '_url', '' ) ?: musilog_public_page_url( $pick['path'] );
+    }
+    unset( $pick );
+    return $picks;
+}
+add_filter( 'query_vars', function( $vars ) { $vars[] = 'musilog_blog'; return $vars; } );
+add_action( 'pre_get_posts', function( $query ) {
+    if ( ! is_admin() && $query->is_main_query() && '1' === $query->get( 'musilog_blog' ) ) {
+        $query->set( 'post_type', 'post' );
+        $query->set( 'page_id', 0 );
+        $query->set( 'pagename', '' );
+        $query->is_page = false;
+        $query->is_singular = false;
+        $query->is_home = true;
+    }
+} );
+add_filter( 'template_include', function( $template ) {
+    return '1' === get_query_var( 'musilog_blog' ) ? get_theme_file_path( '/index.php' ) : $template;
+} );
+function musilog_default_menu() {
+    echo '<ul id="primary-menu">';
+    $items = array( home_url( '/' ) => 'ホーム', home_url( '/#services' ) => 'Web制作', musilog_blog_url() => 'ブログ', home_url( '/#about' ) => 'プロフィール' );
+    foreach ( $items as $url => $label ) {
+        echo '<li><a href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a></li>';
+    }
+    echo '</ul>';
+}
+
+add_action( 'customize_register', function( $wp_customize ) {
+    $wp_customize->add_section( 'musilog_reading', array( 'title' => 'Musilog：はじめての方へ', 'priority' => 31 ) );
+    foreach ( musilog_reading_picks() as $index => $pick ) {
+        foreach ( array( 'title' => '見出し', 'description' => '紹介文', 'url' => '記事URL' ) as $field => $label ) {
+            $id = 'musilog_pick_' . ( $index + 1 ) . '_' . $field;
+            $wp_customize->add_setting( $id, array( 'default' => 'url' === $field ? '' : $pick[$field], 'sanitize_callback' => 'url' === $field ? 'esc_url_raw' : 'sanitize_text_field' ) );
+            $wp_customize->add_control( $id, array( 'label' => '記事' . ( $index + 1 ) . '：' . $label, 'section' => 'musilog_reading', 'type' => 'url' === $field ? 'url' : 'text' ) );
+        }
+    }
+} );
+function musilog_footer_menu() {
+    echo '<ul id="footer-menu"><li><a href="' . esc_url( musilog_profile_url() ) . '">ムジログについて</a></li><li><a href="' . esc_url( musilog_contact_url() ) . '">お問い合わせ</a></li></ul>';
+}

@@ -1,0 +1,1 @@
+<div class="empty-state"><h2>記事が見つかりませんでした</h2><p>別のキーワードで検索するか、これからの更新をお待ちください。</p><?php get_search_form(); ?></div>

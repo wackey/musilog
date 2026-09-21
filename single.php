@@ -9,6 +9,8 @@ get_header();
 ?>
 
 	<main id="primary" class="site-main container">
+    <nav class="article-breadcrumb" aria-label="パンくずリスト"><a href="<?php echo esc_url( home_url( '/' ) ); ?>">ホーム</a><span aria-hidden="true">/</span><a href="<?php echo esc_url( musilog_blog_url() ); ?>">ブログ</a><span aria-hidden="true">/</span><span>記事</span></nav>
+    <div class="blog-layout"><div class="blog-main">
 
 		<?php
 		while ( have_posts() ) :
@@ -19,7 +21,8 @@ get_header();
 
                 <header class="entry-header">
                     <div class="entry-meta">
-                        <span class="posted-on"><?php echo get_the_date(); ?></span>
+                        <time class="posted-on" datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>"><?php echo esc_html( get_the_date( 'Y.m.d' ) ); ?></time>
+                        <?php if ( get_the_modified_date( 'Ymd' ) > get_the_date( 'Ymd' ) ) : ?><time datetime="<?php echo esc_attr( get_the_modified_date( 'c' ) ); ?>">更新：<?php echo esc_html( get_the_modified_date( 'Y.m.d' ) ); ?></time><?php endif; ?>
                         <span class="cat-links"><?php the_category( ', ' ); ?></span>
                     </div>
 
@@ -31,11 +34,6 @@ get_header();
                     </div>
                     <?php endif; ?>
                 </header>
-
-                <!-- Ad Placeholder: Before Content -->
-                <div class="ad-placeholder ad-before-content">
-                    <p>Advertisement Space (Concept)</p>
-                </div>
 
                 <div class="entry-content">
                     <?php
@@ -77,11 +75,6 @@ get_header();
                     </div>
                 </div>
 
-                <!-- Ad Placeholder: After Content -->
-                <div class="ad-placeholder ad-after-content">
-                    <p>Advertisement Space (Concept)</p>
-                </div>
-
                 <footer class="entry-footer">
                     <?php
                         // Tags if needed
@@ -104,14 +97,14 @@ get_header();
                     'category__in'     => $category_ids,
                     'post__not_in'     => array( get_the_ID() ),
                     'posts_per_page'   => 3,
-                    'caller_get_posts' => 1,
+                    'ignore_sticky_posts' => true,
                 );
 
                 $related_query = new WP_Query( $args );
 
                 if ( $related_query->have_posts() ) {
                     echo '<div class="related-posts">';
-                    echo '<h3>' . esc_html__( 'Related Posts', 'musilog' ) . '</h3>';
+                    echo '<h3>' . esc_html__( 'あわせて読みたい', 'musilog' ) . '</h3>';
                     echo '<div class="post-grid">';
                     while ( $related_query->have_posts() ) {
                         $related_query->the_post();
@@ -128,8 +121,8 @@ get_header();
             // Removed spacer
             the_post_navigation(
                 array(
-                    'prev_text' => '<span class="nav-subtitle">' . esc_html__( 'Previous:', 'musilog' ) . '</span> <span class="nav-title">%title</span>',
-                    'next_text' => '<span class="nav-subtitle">' . esc_html__( 'Next:', 'musilog' ) . '</span> <span class="nav-title">%title</span>',
+                    'prev_text' => '<span class="nav-subtitle">' . esc_html__( '前の記事', 'musilog' ) . '</span> <span class="nav-title">%title</span>',
+                    'next_text' => '<span class="nav-subtitle">' . esc_html__( '次の記事', 'musilog' ) . '</span> <span class="nav-title">%title</span>',
                 )
             );
             echo '</div>';
@@ -142,7 +135,7 @@ get_header();
 		endwhile; // End of the loop.
 		?>
 
-	</main><!-- #primary -->
+	</div><?php get_sidebar(); ?></div></main><!-- #primary -->
 
 <?php
 get_footer();
